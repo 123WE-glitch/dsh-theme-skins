@@ -1,0 +1,10 @@
+node_modules/
+preview/
+verify/
+verify-debug/
+docs/raw/
+.chrome-profile/
+.chrome-cdp-profile/
+*.log
+.DS_Store
+Thumbs.db

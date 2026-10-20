@@ -1,0 +1,3 @@
+- insert:
+    - id: theme-skins
+      name: '@local/dsh-theme-skins'

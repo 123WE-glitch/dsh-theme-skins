@@ -1,0 +1,49 @@
+{
+  "name": "@local/dsh-theme-skins",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Four curated color skins for the DeepSeek Harness Web UI — Aurora, Night Flight, Nordfjord and Sakura — switchable in Settings › General.",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "theme",
+    "color-theme",
+    "dark-mode",
+    "web-ui"
+  ],
+  "license": "MIT",
+  "author": "123WE-glitch (https://github.com/123WE-glitch)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/123WE-glitch/dsh-theme-skins.git"
+  },
+  "homepage": "https://github.com/123WE-glitch/dsh-theme-skins#readme",
+  "bugs": {
+    "url": "https://github.com/123WE-glitch/dsh-theme-skins/issues"
+  },
+  "icon": "./icon.svg",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "locale/*.json"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}
