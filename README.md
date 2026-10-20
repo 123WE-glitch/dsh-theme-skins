@@ -4,6 +4,7 @@
 浅色 / 深色自动适配，一键切换，重启后仍会记住；不想要时点「默认」即可完全恢复原生外观。
 
 <p>
+  <img alt="release" src="https://img.shields.io/github/v/release/123WE-glitch/dsh-theme-skins">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-blue">
   <img alt="DSH" src="https://img.shields.io/badge/DeepSeek%20Harness-0.2.x-6A5AE0">
   <img alt="themes" src="https://img.shields.io/badge/themes-4%20%2B%201%20default-2E7DE9">
@@ -11,12 +12,31 @@
 
 ![Aurora light](docs/aurora-light.png)
 
+## ⬇️ 下载即用（Windows 一键安装）
+
+不想折腾源码？下载一个 exe，双击即可，**无需 Node / Git / 联网**：
+
+| 文件 | 用途 |
+| --- | --- |
+| **[DSH-ThemeSkins-Setup.exe](https://github.com/123WE-glitch/dsh-theme-skins/releases/latest/download/DSH-ThemeSkins-Setup.exe)** | 一键安装（约 190 KB） |
+| **[DSH-ThemeSkins-Uninstall.exe](https://github.com/123WE-glitch/dsh-theme-skins/releases/latest/download/DSH-ThemeSkins-Uninstall.exe)** | 一键卸载 |
+| [dsh-theme-skins-portable.zip](https://github.com/123WE-glitch/dsh-theme-skins/releases/latest/download/dsh-theme-skins-portable.zip) | 便携版（给 Agent 或手动安装用） |
+
+安装程序会：把插件复制到 `%LOCALAPPDATA%\dsh-theme-skins` → 用 Harness 自带的 pnpm 把插件登记进当前 profile（找不到运行时时自动改用目录链接 + 直接写入依赖）→ 启用 bundle。
+装好后**重启 DeepSeek Harness**，在 **设置 › 通用 › 主题皮肤** 里切换。卸载运行 Uninstall.exe，同样重启后恢复原生界面。
+
+> 小提示：exe 未做代码签名，Windows SmartScreen 可能提示「已保护你的电脑」——点「更多信息 → 仍要运行」即可。不放心的话可以按本文档的「构建与打包」一节，用源码自行编译（逻辑透明，可逐行审阅）。
+
+![installer](docs/installer.png)
+
+
 ## ✨ 特性
 
 - **4 套完整配色** + 1 个「默认」选项，共 5 种外观；
 - 每套主题自带 **浅色 / 深色两套色板**，跟随「设置 › 外观」里的 浅色 / 深色 / 跟随系统 自动切换；
 - 覆盖 DSH 设计系统的完整颜色 token：画布、表面层、边框、文字层级、主色、状态色、代码高亮、用户气泡、菜单/弹窗、滚动条、diff 颜色……共 **104 个 token**；
 - **零布局改动**：不重写 DOM、不替换组件，以 `ctx.theme.overrideTokens` 的 token 覆盖层实现，禁用插件即完全还原；
+- **Windows 一键安装 exe**（自带全部文件，无需 Node / Git），也提供便携版与源码安装方式；
 - 中英双语设置行，选择保存在浏览器 `localStorage`；
 - 无第三方依赖，`client.js` 是预构建的单文件模块，安装即用。
 
@@ -44,9 +64,10 @@
 
 ![Aurora dark](docs/aurora-dark.png)
 
-## 📦 安装
+## 📦 其他安装方式（源码 / Agent / 手动）
 
 > 前提：DeepSeek Harness 桌面端（0.2.x，Web GUI 由 `@deepseek-ai/dsh-client-ui-theme` 提供 `theme` 服务）。
+> Windows 用户优先用上面的 exe；没有 exe（或想从源码安装）时用下面的方式。
 
 **推荐方式：由 Harness 里的 Agent 安装（Plugin Manager）**
 
@@ -91,7 +112,7 @@ pnpm add "link:C:/path/to/dsh-theme-skins"
 
 - 颜色模式不用单独选：主题会跟随「外观」的 浅色/深色/跟随系统；
 - 点「默认」立即完全恢复 DSH 原生外观；
-- 卸载：设置 › 插件 中移除该 bundle（或让 Agent 调用 `plugin_manager` 的 `remove_bundle`）。
+- 卸载：运行 `DSH-ThemeSkins-Uninstall.exe`，或在 设置 › 插件 中移除该 bundle（或让 Agent 调用 `plugin_manager` 的 `remove_bundle`）。
 
 ## 🛠 自定义 / 添加主题
 
@@ -122,6 +143,27 @@ pnpm add "link:C:/path/to/dsh-theme-skins"
 | `python src/make-gallery.py <rawDir> <out.png>` | 把各主题截图拼成总览图 |
 
 脚本通过 DevTools 协议驱动一个 headless Chrome/Edge/Chromium；为了访问本地 GUI，它会读取你**自己**的 `$DSH_HOME/.credentials.yaml` 并铸造浏览器会话 cookie（仅本机使用）。可用环境变量：`CHROME_PATH`（浏览器可执行文件）、`DSH_HOME`（默认 `~/.dsh`）、`DSH_WEB_URL`（默认 `http://127.0.0.1:19387`）。
+
+## 🔨 构建与打包（生成 Release 里的 exe）
+
+安装程序是单个 C# 源码（[`packaging/Installer.cs`](packaging/Installer.cs)）+ 内嵌的 base64 插件文件（[`packaging/generate-payload.mjs`](packaging/generate-payload.mjs) 生成），用 .NET Framework 自带的 `csc.exe` 编译，无需 Visual Studio：
+
+```powershell
+# 1) 构建 Setup.exe / Uninstall.exe / 便携版 zip  → 输出到 dist\
+powershell -ExecutionPolicy Bypass -File packaging/build.ps1
+
+# 2) 冒烟测试：用临时 profile 跑 安装 → 重复安装 → 卸载 → 无运行时降级路径
+powershell -ExecutionPolicy Bypass -File packaging/test-install.ps1
+
+# 3)（可选）给文档截一张安装器窗口图
+powershell -ExecutionPolicy Bypass -File packaging/capture-installer-shot.ps1 docs\installer.png
+```
+
+- 依赖：Windows + .NET Framework 4.x（系统自带 `csc.exe`）、Node.js（构建脚本也会自动使用 Harness 运行时的 node）；只有重新生成图标才需要 Python + Pillow；
+- `dist/`、`packaging/Payload.g.cs`、`packaging/icon.png` 都是构建产物，已被 `.gitignore` 忽略；
+- 安装器行为：解压到 `%LOCALAPPDATA%\dsh-theme-skins` → 寻找 `$DSH_HOME/dsh-runtimes/*/dependencies` 里的 pnpm 执行 `pnpm add link:<dir>` → 修改 profile `package.json` 的 `dsh.profile.bundles`；找不到 pnpm 时降级为目录 junction + 直接写依赖。卸载器逆向执行。
+- 静默安装（适合脚本）：`DSH-ThemeSkins-Setup.exe --silent`（退出码 0/1）；也可用 `--uninstall` 触发卸载模式。
+
 
 ## 🧠 实现原理
 
@@ -154,6 +196,8 @@ pnpm add "link:C:/path/to/dsh-theme-skins"
 # English
 
 A community theme plugin for **DeepSeek Harness**'s Web UI, shipping four curated color skins — **Aurora**, **Night Flight**, **Nordfjord**, **Sakura** — plus the original look as **Default**.
+
+**Download & run (Windows):** grab **[DSH-ThemeSkins-Setup.exe](https://github.com/123WE-glitch/dsh-theme-skins/releases/latest/download/DSH-ThemeSkins-Setup.exe)**, double-click, restart DeepSeek Harness, then pick a skin in **Settings › General › Theme skin**. No Node, Git or network needed. Uninstall with **[DSH-ThemeSkins-Uninstall.exe](https://github.com/123WE-glitch/dsh-theme-skins/releases/latest/download/DSH-ThemeSkins-Uninstall.exe)**. Unsigned build: if SmartScreen warns, choose *More info → Run anyway*, or build it yourself from [`packaging/`](packaging/) with `powershell -File packaging/build.ps1`.
 
 - Every skin defines **light and dark** palettes; it follows the built-in Appearance setting (Light / Dark / System) automatically.
 - Implemented as a pure **token override layer** (`ctx.theme.overrideTokens`): no DOM or layout changes, and disabling the plugin fully restores the stock UI.

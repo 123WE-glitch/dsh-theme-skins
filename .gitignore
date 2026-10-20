@@ -3,6 +3,10 @@ preview/
 verify/
 verify-debug/
 docs/raw/
+tmp/
+dist/
+packaging/Payload.g.cs
+packaging/icon.png
 .chrome-profile/
 .chrome-cdp-profile/
 *.log
